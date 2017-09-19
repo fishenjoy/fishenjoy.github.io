@@ -47,11 +47,11 @@
 <div class="overlay" style="background: url(/img/left_col_background.jpg) no-repeat fixed top"></div>
 <div class="intrude-less">
 	<header id="header" class="inner">
-		<a href="" class="profilepic">
+		<a href="https://fishenjoy.github.io" class="profilepic">
 			<img src="/img/dog.jpg" class="js-avatar">
 		</a>
 		<hgroup>
-		  <h1 class="header-author"><a href="">fishenjoy</a></h1>
+		  <h1 class="header-author"><a href="https://fishenjoy.github.io">fishenjoy</a></h1>
 		</hgroup>
 		
 		<p class="header-subtitle">生活，思考的艺术</p>
@@ -852,49 +852,29 @@
 
 
   
-  <div class="duoshuo">
-	<!-- 多说评论框 start -->
-	<div class="ds-thread" data-thread-key="关于github建立个人博客的点点总结" data-title="关于github建立个人博客的点点总结" data-url="https://fishenjoy.github.io/2017/09/18/关于github建立个人博客的点点总结/"></div>
-	<!-- 多说评论框 end -->
-	<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
-	<script type="text/javascript">
-	var duoshuoQuery = {short_name:"true"};
-	(function() {
-		var ds = document.createElement('script');
-		ds.type = 'text/javascript';ds.async = true;
-		ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
-		ds.charset = 'UTF-8';
-		(document.getElementsByTagName('head')[0] 
-		 || document.getElementsByTagName('body')[0]).appendChild(ds);
-	})();
-	</script>
-	<!-- 多说公共JS代码 end -->
-</div>
-
-  
   
   
 
   
 
   
-    <section id="comments">
-      <div id="disqus_thread"></div>
-        <script type="text/javascript">
-        /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
-        var disqus_shortname = 'true'; // required: replace example with your forum shortname
 
-        /* * * DON'T EDIT BELOW THIS LINE * * */
-        (function() {
-          var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
-          dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
-          (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
-        })();
-      </script>
-      <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
-    </section>
   
-
+  <div id="gitment-ctn"></div> 
+<link rel="stylesheet" href="//imsun.github.io/gitment/style/default.css">
+<script src="//imsun.github.io/gitment/dist/gitment.browser.js"></script>
+<script>
+var gitment = new Gitment({
+  id: "https://fishenjoy.github.io/2017/09/18/关于github建立个人博客的点点总结/",
+  owner: 'fishenjoy',
+  repo: 'myblog',
+  oauth: {
+    client_id: 'da7762a464b873ccb3d4',
+    client_secret: '3dbeeb98657b640052937311d465477dfbbd3b94',
+  },
+})
+gitment.render('gitment-ctn')
+</script>
   
  
 
