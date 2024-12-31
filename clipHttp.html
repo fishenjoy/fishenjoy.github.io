@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>剪切板链接提取工具</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      padding: 0;
+      background-color: #f9f9f9;
+      color: #333;
+    }
+    button {
+      padding: 10px 15px;
+      margin: 5px 0;
+      font-size: 16px;
+      border: none;
+      background-color: #007BFF;
+      color: white;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    .link-container {
+      margin-top: 20px;
+    }
+    .link-item {
+      margin-bottom: 10px;
+    }
+    .link-item span {
+      margin-right: 10px;
+      word-break: break-all;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>剪切板链接提取工具</h1>
+  <p>点击下方按钮或直接打开页面，我们会从您的剪切板中提取所有以 <code>http</code> 开头的链接。</p>
+  <button id="fetchLinksButton">从剪切板提取链接</button>
+
+  <div class="link-container" id="linkContainer"></div>
+
+  <script>
+    // 提取剪切板中的内容
+    async function readClipboardAndExtractLinks() {
+      try {
+        const text = await navigator.clipboard.readText(); // 读取剪切板内容
+        const links = extractHttpLinks(text); // 提取所有 http 开头的链接
+        displayLinks(links); // 显示链接
+      } catch (err) {
+        console.error("无法读取剪切板内容: ", err);
+        alert("无法读取剪切板内容，请确保您授予了权限。");
+      }
+    }
+
+    // 从文本中提取所有 http 开头的链接
+    function extractHttpLinks(text) {
+      const regex = /https?:\/\/[^\s]+/g; // 匹配 http 或 https 开头的链接
+      return text.match(regex) || []; // 返回匹配的链接列表
+    }
+
+    // 在网页上显示链接
+    function displayLinks(links) {
+      const container = document.getElementById("linkContainer");
+      container.innerHTML = ""; // 清空之前的内容
+
+      if (links.length === 0) {
+        container.innerHTML = "<p>未找到任何链接。</p>";
+        return;
+      }
+
+      links.forEach((link) => {
+        const linkItem = document.createElement("div");
+        linkItem.className = "link-item";
+
+        const linkText = document.createElement("span");
+        linkText.textContent = link;
+
+        const copyButton = document.createElement("button");
+        copyButton.textContent = "复制链接";
+        copyButton.addEventListener("click", () => copyToClipboard(link));
+
+        linkItem.appendChild(linkText);
+        linkItem.appendChild(copyButton);
+        container.appendChild(linkItem);
+      });
+    }
+
+    // 将链接复制到剪切板
+    function copyToClipboard(text) {
+      navigator.clipboard.writeText(text).then(() => {
+        alert("链接已复制到剪切板！");
+      }).catch((err) => {
+        console.error("复制到剪切板失败: ", err);
+        alert("复制失败，请重试。");
+      });
+    }
+
+    // 页面加载时自动读取剪切板
+    window.addEventListener("load", readClipboardAndExtractLinks);
+
+    // 按钮点击事件
+    document.getElementById("fetchLinksButton").addEventListener("click", readClipboardAndExtractLinks);
+  </script>
+
+</body>
+</html>
