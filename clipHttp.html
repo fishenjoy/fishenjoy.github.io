@@ -6,16 +6,44 @@
   <title>剪切板链接提取工具</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
+     font-family: Arial, sans-serif;
       margin: 20px;
       padding: 0;
       background-color: #f9f9f9;
       color: #333;
+      /*text-align: center;  全局居中 */
+    }
+	 .donation-container {
+      margin: 20px auto; /* 设置容器居中 */
+      text-align: center; /* 容器内部内容居中 */
+    }
+    .donation-text {
+      font-size: 18px;
+      font-weight: bold;
+      color: #007BFF;
+      margin-bottom: 15px; /* 提示文字与图片之间的间距 */
+    }
+    .donation-images {
+      display: flex;
+      justify-content: center;
+      gap: 20px; /* 图片之间的间距 */
+    }
+    .donation-images img {
+      width: 200px;
+      height: 200px;
+      object-fit: cover; /* 保持图片比例 */
+      border-radius: 10px; /* 圆角效果 */
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* 阴影效果 */
+      transition: transform 0.3s ease, box-shadow 0.3s ease; /* 动效 */
+    }
+    .donation-images img:hover {
+      transform: scale(1.05); /* 鼠标悬停放大效果 */
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3); /* 鼠标悬停时阴影加深 */
     }
     button {
       padding: 10px 15px;
-      margin: 5px 0;
-      font-size: 16px;
+      margin: 5px 5px 5px 0;
+      font-size: 14px;
       border: none;
       background-color: #007BFF;
       color: white;
@@ -30,51 +58,133 @@
     }
     .link-item {
       margin-bottom: 10px;
+      display: flex;
+      align-items: left;
     }
     .link-item span {
       margin-right: 10px;
-      word-break: break-all;
+      word-break: break-word;
+      flex-grow: 1;
+    }
+    .group {
+      margin-bottom: 20px;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      background-color: #fff;
+    }
+    .group h3 {
+      margin: 0 0 10px 0;
+      font-size: 18px;
+    }
+    /* 弹窗样式 */
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: #333;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 5px;
+      font-size: 14px;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.3s, visibility 0.3s;
+      z-index: 1000;
+    }
+    .toast.show {
+      opacity: 1;
+      visibility: visible;
     }
   </style>
 </head>
 <body>
-<b>喜欢就请我喝可乐吧🍻</b>
-  <img src="https://github.com/fishenjoy/fishenjoy.github.io/blob/master/img/wechat.jpg?raw=true" alt="请我吃个鸡腿扒" width="200" height="200">
-  <img src="https://github.com/fishenjoy/fishenjoy.github.io/blob/master/img/zhifubao.jpg?raw=true" alt="请我吃个鸡腿扒" width="200" height="200">
-  <h1>剪切板链接提取工具</h1>
+<div class="donation-container">
+    <p class="donation-text">喜欢就请我喝可乐吧🍻</p>
+    <div class="donation-images">
+      <img src="https://github.com/fishenjoy/fishenjoy.github.io/blob/master/img/wechat.jpg?raw=true" alt="请我喝可乐 - 微信">
+      <img src="https://github.com/fishenjoy/fishenjoy.github.io/blob/master/img/zhifubao.jpg?raw=true" alt="请我喝可乐 - 支付宝">
+    </div>
+	  </div>
+   <h1>剪切板链接提取工具</h1>
   <p>点击下方按钮或直接打开页面，我们会从您的剪切板中提取所有以 <code>http</code> 开头的链接。</p>
   <button id="fetchLinksButton">从剪切板提取链接</button>
+  <button id="copyAllLinksButton">一键复制所有链接</button>
+  <button id="deleteAllLinksButton">一键删除所有链接</button>
 
   <div class="link-container" id="linkContainer"></div>
 
+  <!-- 全局弹窗 -->
+  <div id="toast" class="toast"></div>
+
   <script>
+    let groupCount = 0; // 记录分组次数
+    const displayedLinks = new Set(); // 存储已显示的链接（全局去重）
+
+    // 显示弹窗提示
+    function showToast(message) {
+      const toast = document.getElementById("toast");
+      toast.textContent = message; // 设置提示内容
+      toast.classList.add("show"); // 显示弹窗
+      setTimeout(() => {
+        toast.classList.remove("show"); // 1.5秒后隐藏弹窗
+      }, 1500);
+    }
+
     // 提取剪切板中的内容
     async function readClipboardAndExtractLinks() {
       try {
         const text = await navigator.clipboard.readText(); // 读取剪切板内容
-        const links = extractHttpLinks(text); // 提取所有 http 开头的链接
-        displayLinks(links); // 显示链接
+        const newLinks = extractHttpLinks(text); // 提取所有 http 开头的链接并去重
+
+        if (newLinks.length > 0) {
+          groupCount++; // 增加分组计数
+          displayLinks(newLinks, groupCount); // 显示新链接
+          showToast(`成功添加 ${newLinks.length} 个新链接！`);
+        } else {
+          showToast("剪切板中未找到任何新链接！");
+        }
       } catch (err) {
         console.error("无法读取剪切板内容: ", err);
-        alert("无法读取剪切板内容，请确保您授予了权限。");
+        showToast("无法读取剪切板内容，请确保您授予了权限。");
       }
     }
 
-    // 从文本中提取所有 http 开头的链接
+    // 从文本中提取所有符合规则的 http 链接，并去重
     function extractHttpLinks(text) {
       const regex = /https?:\/\/[^\s]+/g; // 匹配 http 或 https 开头的链接
-      return text.match(regex) || []; // 返回匹配的链接列表
+      const links = text.match(regex) || []; // 返回匹配的链接列表
+
+      // 单次去重：利用 Set 去重当前提取的链接
+      const uniqueLinks = Array.from(new Set(
+        links.map(link => link.replace(/\)$/, '')) // 去掉末尾的括号
+      ));
+
+      // 全局去重：过滤掉已经显示的链接
+      return uniqueLinks.filter(link =>
+        !displayedLinks.has(link) && // 全局去重
+        !link.startsWith("https://github.com") &&
+        !link.startsWith("https://apps.apple") &&
+        !link.startsWith("http://github.com") &&
+        !link.startsWith("https://play.google.com") &&
+        !link.startsWith("https://t.me/")
+      ).map(link => {
+        displayedLinks.add(link); // 添加到全局去重集合
+        return link;
+      });
     }
 
-    // 在网页上显示链接
-    function displayLinks(links) {
+    // 在网页上显示链接，按分组显示
+    function displayLinks(links, groupNumber) {
       const container = document.getElementById("linkContainer");
-      container.innerHTML = ""; // 清空之前的内容
+      const group = document.createElement("div"); // 创建新的分组容器
+      group.className = "group";
 
-      if (links.length === 0) {
-        container.innerHTML = "<p>未找到任何链接。</p>";
-        return;
-      }
+      // 添加分组标题
+      const groupTitle = document.createElement("h3");
+      groupTitle.textContent = `第 ${groupNumber} 次添加的链接：`;
+      group.appendChild(groupTitle);
 
       links.forEach((link) => {
         const linkItem = document.createElement("div");
@@ -85,22 +195,63 @@
 
         const copyButton = document.createElement("button");
         copyButton.textContent = "复制链接";
-        copyButton.addEventListener("click", () => copyToClipboard(link));
+        copyButton.addEventListener("click", () => {
+          copyToClipboard(link);
+          showToast("链接已复制到剪切板！");
+        });
+
+        const deleteButton = document.createElement("button");
+        deleteButton.textContent = "删除";
+        deleteButton.addEventListener("click", () => {
+          linkItem.remove();
+          displayedLinks.delete(link); // 同时从已显示链接中移除
+        });
 
         linkItem.appendChild(linkText);
         linkItem.appendChild(copyButton);
-        container.appendChild(linkItem);
+        linkItem.appendChild(deleteButton);
+        group.appendChild(linkItem);
       });
+
+      container.appendChild(group); // 将分组添加到容器中
     }
 
     // 将链接复制到剪切板
     function copyToClipboard(text) {
       navigator.clipboard.writeText(text).then(() => {
-        alert("链接已复制到剪切板！");
+        showToast("链接已复制到剪切板！");
       }).catch((err) => {
         console.error("复制到剪切板失败: ", err);
-        alert("复制失败，请重试。");
+        showToast("复制失败，请重试。");
       });
+    }
+
+    // 一键复制所有链接
+    function copyAllLinks() {
+      const links = Array.from(document.querySelectorAll(".link-item span")) // 获取所有显示的链接
+        .map(linkElement => linkElement.textContent); // 提取链接文本
+
+      if (links.length === 0) {
+        showToast("当前页面没有链接可复制！");
+        return;
+      }
+
+      const allLinksText = links.join("\n"); // 将所有链接拼接为换行分隔的文本
+
+      navigator.clipboard.writeText(allLinksText).then(() => {
+        showToast("已复制所有链接到剪切板！");
+      }).catch((err) => {
+        console.error("复制所有链接失败: ", err);
+        showToast("复制失败，请重试。");
+      });
+    }
+
+    // 一键删除所有链接
+    function deleteAllLinks() {
+      const container = document.getElementById("linkContainer");
+      container.innerHTML = ""; // 清空容器内容
+      displayedLinks.clear(); // 清空已显示链接
+      showToast("已删除所有链接！");
     }
 
     // 页面加载时自动读取剪切板
@@ -108,7 +259,8 @@
 
     // 按钮点击事件
     document.getElementById("fetchLinksButton").addEventListener("click", readClipboardAndExtractLinks);
+    document.getElementById("copyAllLinksButton").addEventListener("click", copyAllLinks);
+    document.getElementById("deleteAllLinksButton").addEventListener("click", deleteAllLinks);
   </script>
-
 </body>
 </html>
