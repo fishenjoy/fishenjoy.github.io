@@ -156,10 +156,9 @@
       const regex = /https?:\/\/[^\s]+/g; // 匹配 http 或 https 开头的链接
       const links = text.match(regex) || []; // 返回匹配的链接列表
 
-      // 单次去重：利用 Set 去重当前提取的链接
-      const uniqueLinks = Array.from(new Set(
-        links.map(link => link.replace(/\)$/, '')) // 去掉末尾的括号
-      ));
+    const uniqueLinks = Array.from(new Set(
+      links.map(link => link.split(')')[0]) // 保留括号之前的内容
+    ));
 
       // 全局去重：过滤掉已经显示的链接
       return uniqueLinks.filter(link =>
@@ -168,7 +167,9 @@
         !link.startsWith("https://apps.apple") &&
         !link.startsWith("http://github.com") &&
         !link.startsWith("https://play.google.com") &&
-        !link.startsWith("https://t.me/")
+        !link.startsWith("https://t.me/")&&
+        !link.startsWith("http://wukong.bar")&&
+        !link.startsWith("http://web7.vip")
       ).map(link => {
         displayedLinks.add(link); // 添加到全局去重集合
         return link;
@@ -246,13 +247,14 @@
       });
     }
 
-    // 一键删除所有链接
-    function deleteAllLinks() {
+  function deleteAllLinks() {
+    if (confirm("您确定要删除所有链接吗？")) {
       const container = document.getElementById("linkContainer");
       container.innerHTML = ""; // 清空容器内容
       displayedLinks.clear(); // 清空已显示链接
       showToast("已删除所有链接！");
     }
+  }
 
     // 页面加载时自动读取剪切板
     window.addEventListener("load", readClipboardAndExtractLinks);
